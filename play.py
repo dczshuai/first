@@ -39,9 +39,11 @@ def houserule(x):
         print("it is up to maximum!")
     return x
 
+st=[[]]
 def maps(a):
     global lenth
     global width
+    global st
     st=[["*"for i in range(a)]for i in range(a)]
     x=0
     y=0
@@ -80,7 +82,7 @@ def maps(a):
 
 def fee(x,y,name):
     level=st[x][y][1]
-    df.at[name,"cash"]=pa_ca
+    pa_ca=df.at[name,"cash"]
     if pa_ca>=1000:
         fees=pa_ca*0.02*1.5**level
     return fees
