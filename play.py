@@ -87,6 +87,7 @@ def maps(b):
                 if st[-1][j]=="*":
                     m=j
                 else:
+                    m=-1
                     break
             break
     for k in range(-1,-len(st)-1,-1):
@@ -288,10 +289,10 @@ def day():#回合跳过累计
     global time
     if number==0:
         for i in df.index:
-            if df.at[i,"day"]!=0:
-                df.at[i,"day"]-=1
+            if df.at[i,"time"]!=0:
+                df.at[i,"time"]-=1
         time+=1
-        print("today is ",time,"day")
+        print("today is ",time,"time")
     
 def ecard(cardname):#控制股票卡
     eq=input("which equity?")
@@ -370,7 +371,7 @@ while flag2:#主程序
     pid=que()
     person=dicname(pid)
     flag=flag1=True
-    while True and df.at[pid,"day"]!=0:
+    while True and df.at[pid,"time"]!=0:
         print("player"+person+"time")
         dices=dice()
         choose=input("choose one to do:\ntoy\nwalk\nstock\nbuy\nshop")
