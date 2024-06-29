@@ -17,30 +17,30 @@ number=0
 flag2=True
 while True:
     x=input("how many players?")
-    if "0"<=x<="9":
-        int(x)
+    if x.isdigit():
+        x=int(x)
         break
     else:
         print("error!")
 while True:
     shoplist=input("how many list in shop?")
-    if "0"<=shoplist<="9":
-        int(shoplist)
+    if shoplist.isdigit():
+        shoplist=int(shoplist)
         break
     else:
         print("error!")
 def player(x):
     while True:
         money=input("how much start?")
-        if "0"<=money<="9":
-            int(money)
+        if money.isdigit():
+            money=int(money)
             break
         else:
             print("error!")
     while True:
         bank=input("how much in bank?")
-        if "0"<=bank<="9":
-            int(bank)
+        if bank.isdigit():
+            bank=int(bank)
             break
         else:
             print("error!")
@@ -49,8 +49,8 @@ def player(x):
 a=player(x)
 while True:
     b=input("how many blocks?")
-    if "0"<=b<="9":
-        int(b)
+    if b.isdigit():
+        b=int(b)
         break
     else:
         print("error!")
@@ -179,8 +179,8 @@ def joke():
         luck=ra.randint(1,10)
         while True:
             a=input("print 1 to buy it in high price/nprint 2 to try to buy it in low price")
-            if "0"<=a<="9":
-                int(a)
+            if a.isdigit():
+                a=int(a)
                 break
             else:
                 print("error!")
@@ -314,8 +314,8 @@ def stock(pid):#股票
                     
                     while True:
                         num=input("amount?")
-                        if "0"<=num<="9":
-                            int(num)
+                        if num.isdigit():
+                            num=int(num)
                             break
                         else:
                             print("error!")
@@ -332,8 +332,8 @@ def stock(pid):#股票
             else:
                 while True:
                     num=input("amount?")
-                    if "0"<=num<="9":
-                        int(num)
+                    if num.isdigit():
+                        num=int(num)
                         break
                     else:
                         print("error!")
