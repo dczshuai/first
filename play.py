@@ -9,12 +9,12 @@ toydf=pd.DataFrame(toydic,columns=["toyname","per price"])
 toyindex={}
 for i in toydf.index:
     toyindex[toydf.at[i,"toyname"]]=i
+flag2=True#决定游戏是否继续进行
 ways=0#方向
 time=0#时间
 width=0#地图宽度
 lenth=0#地图长度
 number=0#记录第几个玩家
-flag2=True
 while True:#初始化玩家
     x=input("how many players?")
     if x.isdigit():
@@ -367,7 +367,7 @@ def shop(pid):#超市
 while flag2:#主程序
     day()
     pid=que()
-    person=dicname(pid)
+    person=dicname[pid]
     flag=flag1=True
     while True and df.at[pid,"time"]!=0:
         print("player"+person+"time")
@@ -396,6 +396,7 @@ while flag2:#主程序
             shop(pid)
             flag1=False
         elif choose=="stop":
+            flag2=False
             break
         else:
             print("error!")
