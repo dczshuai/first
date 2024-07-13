@@ -369,7 +369,7 @@ while flag2:#主程序
     pid=que()
     person=dicname[pid]
     flag=flag1=True
-    while True and df.at[pid,"time"]!=0:
+    while True and df.at[pid,"time"]==0:
         print("player"+person+"time")
         dices=dice()
         choose=input("choose one to do:\ntoy\nwalk\nstock\nbuy\nshop")
