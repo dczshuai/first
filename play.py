@@ -23,7 +23,7 @@ while True:#初始化玩家
         break
     else:
         print("error!")
-        t.sleep(1500)
+        t.sleep(1.5)
 while True:#初始化商店
     shoplist=input("商店里陈列多少件商品？")
     if shoplist.isdigit():
@@ -31,7 +31,7 @@ while True:#初始化商店
         break
     else:
         print("error!")
-        t.sleep(1500)
+        t.sleep(1.5)
 def player(x):#初始化金额
     while True:
         cash=input("起始现金多少？")
@@ -40,7 +40,7 @@ def player(x):#初始化金额
             break
         else:
             print("error!")
-            t.sleep(1500)
+            t.sleep(1.5)
     while True:
         bank=input("起始银行存储多少?")
         if bank.isdigit():
@@ -48,7 +48,7 @@ def player(x):#初始化金额
             break
         else:
             print("error!")
-            t.sleep(1500)
+            t.sleep(1.5)
     list1=[[cash,bank,{},ways,{},time,0,0,{}]for i in range(x)]
     return list1
 playersave=player(x)
@@ -59,7 +59,7 @@ while True:
         break
     else:
         print("error!")
-        t.sleep(1500)
+        t.sleep(1.5)
 blocks=blocks-1
 df=pd.DataFrame(playersave,columns=["cash","bank","toy","way","houseplace","time","x","y","stock"])
 df.insert(0,"name","")
@@ -136,7 +136,7 @@ def houserule(level):#房产升级规则
                         break
                     else:
                         print("error!")
-                        t.sleep(1500)
+                        t.sleep(1.5)
                 else:
                         a=input("按下1退出")
                         if a=="1":
@@ -197,7 +197,7 @@ def joke():#购买地产规则
                 break
             else:
                 print("error!")
-                t.sleep(1500)
+                t.sleep(1.5)
         if a==2:
             if luck<=5:
                 prices=prices*1.5
@@ -208,7 +208,7 @@ def joke():#购买地产规则
             break
         else:
             print("error!")
-            t.sleep(1500)
+            t.sleep(1.5)
         chooce=int(input("按1继续"))
         if chooce==1:
             continue
@@ -252,7 +252,7 @@ def buy(pid):#金额判定
                 return True
             else:
                 print("error!")
-                t.sleep(1500)
+                t.sleep(1.5)
                 return False
         else:
             return False
@@ -318,14 +318,14 @@ def ecard(cardname):#控制股票卡
         
 def stock(pid):#股票
     global df
-    print("this is what in your hand\n",df.at[pid,"stock"])
+    print("你手中有这些\n",df.at[pid,"stock"])
     while True:
         choose=input("选择一个并输入:sell?buy?quit?")
         if choose=="sell":
             item=input("选择品牌："+str(edf.index))
             if item not in df.at[pid,"stock"]:
                 print("error!")
-                t.sleep(1500)
+                t.sleep(1.5)
             else:
                 while True:
                     while True:
@@ -335,10 +335,10 @@ def stock(pid):#股票
                             break
                         else:
                             print("error!")
-                            t.sleep(1500)
+                            t.sleep(1.5)
                     if num>df.at[pid,"stock"][item]:
                         print("error!")
-                        t.sleep(1500)
+                        t.sleep(1.5)
                     else:
                         df.at[pid,"stock"][item]-=num
                         df.at[pid,"bank"]+=edf[item,"per price"]*num
@@ -347,7 +347,7 @@ def stock(pid):#股票
             item=input("选择品牌："+str(edf.index))
             if item not in edf["Brand"]:
                 print("error!")
-                t.sleep(1500)
+                t.sleep(1.5)
             else:
                 while True:
                     num=input("数量?")
@@ -356,10 +356,10 @@ def stock(pid):#股票
                         break
                     else:
                         print("error!")
-                        t.sleep(1500)
+                        t.sleep(1.5)
                     if df.at[pid,"bank"]<edf[item,"per price"]*num:
                         print("error!")
-                        t.sleep(1500)
+                        t.sleep(1.5)
                     else:
                         df.at[pid,"stock"][item]+=num
                         df.at[pid,"bank"]-=edf[item,"per price"]*num
@@ -392,10 +392,10 @@ while flag2:#主程序
     person=dicname[pid]
     flag=flag1=True
     while True and df.at[pid,"time"]==0:
-        print("player"+person+"time\n手头现金：",df.at[pid]["cash"],"\n银行存款：",df.at[pid]["bank"])
-        print("你所处位置：",df.at[pid]['x'],df.at[pid]['y'])
+        print("player"+person+"time\n手头现金：",df.at[pid,"cash"],"\n银行存款：",df.at[pid,"bank"])
+        print("你所处位置：",df.at[pid,'x'],df.at[pid,'y'])
         dices=dice()
-        t.sleep(1500)
+        t.sleep(1.5)
         for i in map:
             print(i)
         choose=input("选择一件事去做:\ntoy\nwalk\nstock\nbuy\nshop\nrename\n")
@@ -409,10 +409,10 @@ while flag2:#主程序
                     #运行toyrule函数（未编写）
                 else:
                     print("error!")
-                    t.sleep(1500)
+                    t.sleep(1.5)
             else:
                 print("error!")
-                t.sleep(1500)
+                t.sleep(1.5)
         elif choose=="stock":
             stock(pid)
         elif choose=="walk":
@@ -433,7 +433,7 @@ while flag2:#主程序
             rename(pid)
         else:
             print("error!")
-            t.sleep(1500)
+            t.sleep(1.5)
 
 
 df["total"]=df["cash"]+df["bank"]
