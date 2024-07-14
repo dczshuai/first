@@ -372,7 +372,9 @@ while flag2:#主程序
     while True and df.at[pid,"time"]==0:
         print("player"+person+"time")
         dices=dice()
-        choose=input("choose one to do:\ntoy\nwalk\nstock\nbuy\nshop")
+        for i in st:
+            print(i)
+        choose=input("choose one to do:\ntoy\nwalk\nstock\nbuy\nshop\n")
         if choose=="toy":
             print("the toys you can choose are below:")
             print(df.at[pid,"toy"])
@@ -400,8 +402,7 @@ while flag2:#主程序
             break
         else:
             print("error!")
-        for i in st:
-            print(i)
+
 
 df["total"]=df["cash"]+df["bank"]
 for i in df.index:
