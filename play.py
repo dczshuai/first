@@ -1,7 +1,10 @@
+from ast import literal_eval
 import random as ra
 import pandas as pd
 import matplotlib.pyplot as plt
 import time as t
+import os
+
 
 dics={"Brand":["oil","electric","airspace","house"],"per price":[200,100,150,300]}
 edf=pd.DataFrame(dics,columns=["Brand","per price"],index=["oil","electric","airspace","house"])
@@ -16,66 +19,15 @@ time=0#时间
 width=0#地图宽度
 lenth=0#地图长度
 number=0#记录第几个玩家
-while True:#初始化玩家
-    x=input("多少个玩家？")
-    if x.isdigit():
-        x=int(x)
-        break
+        
+def file_exists(directory, filename):
+    file_path = os.path.join(directory, filename)# 构建完整的文件路径
+    if os.path.exists(file_path):# 检查文件是否存在
+        return True
     else:
-        print("error!")
-        t.sleep(1.5)
-while True:#初始化商店
-    shoplist=input("商店里陈列多少件商品？")
-    if shoplist.isdigit():
-        shoplist=int(shoplist)
-        break
-    else:
-        print("error!")
-        t.sleep(1.5)
-def player(x):#初始化金额
-    while True:
-        cash=input("起始现金多少？")
-        if cash.isdigit():
-            cash=int(cash)
-            break
-        else:
-            print("error!")
-            t.sleep(1.5)
-    while True:
-        bank=input("起始银行存储多少?")
-        if bank.isdigit():
-            bank=int(bank)
-            break
-        else:
-            print("error!")
-            t.sleep(1.5)
-    list1=[[cash,bank,{},ways,{},time,0,0,{}]for i in range(x)]
-    return list1
-playersave=player(x)
-while True:
-    blocks=input("地图多少格?")
-    if blocks.isdigit():
-        blocks=int(blocks)
-        break
-    else:
-        print("error!")
-        t.sleep(1.5)
-blocks=blocks-1
-df=pd.DataFrame(playersave,columns=["cash","bank","toy","way","houseplace","time","x","y","stock"])
-df.insert(0,"name","")
-dicname={}
-dicnumber={}
-for i in df.index:
-    df.at[i,"name"]="p"+str(i+1)
-    dicnumber[df.at[i,"name"]]=i
-    dicname[i]=df.at[i,"name"]
+        return False
 
-def rename(pid):
-    global dicname
-    rename=input("你的新名字？")
-    dicname[pid]=rename
-    print("你的新名字是:"+rename)
-
+playersaves=input("你的存档名？")
 def maps(blocks):#初始化地图
     global lenth
     global width
@@ -90,8 +42,8 @@ def maps(blocks):#初始化地图
             x=x+1
         else:
             y=y+1
-        map[y][x]=[None,None,None]
-        if x+y>blocks:
+        map[y][x]=[-1,-1,-1]
+        if x+y>=blocks-1:
             break
     while True:#去除多余地图块
         if map[-1]==["*"for i in range(blocks)]:
@@ -111,41 +63,107 @@ def maps(blocks):#初始化地图
     map[-1][-1]="e"
     return map
 
-map=maps(blocks)
+def player(x):#初始化金额
+    while True:
+        cash=input("起始现金多少？")
+        if cash.isdigit():
+            cash=float(cash)
+            break
+        else:
+            print("error!")
+            t.sleep(1)
+    while True:
+        bank=input("起始银行存储多少?")
+        if bank.isdigit():
+            bank=float(bank)
+            break
+        else:
+            print("error!")
+            t.sleep(1)
+    list1=[[cash,bank,{},ways,{},time,0,0,{}]for i in range(x)]
+    return list1
+if not file_exists("","save"):#检测是否有存档
+    os.mkdir("save")
+if not file_exists("save",playersaves):#检测是否有存档
+    os.mkdir("save/"+playersaves)
+if file_exists("save/"+playersaves,"playersave.xlsx"):
+    df=pd.read_excel("save/"+playersaves+"/playersave.xlsx")
+else:
+    while True:#初始化玩家
+        x=input("多少个玩家？")
+        if x.isdigit():
+            x=int(x)
+            break
+        else:
+            print("error!")
+            t.sleep(1)
+    playersave=player(x)
+    df=pd.DataFrame(playersave,columns=["cash","bank","toy","way","houseplace","time","x","y","stock"])
+    df.insert(0,"name","")
+if file_exists("save/"+playersaves,"mapsave.txt"):
+    mapsave=open("save/"+playersaves+"/mapsave.txt","r")
+    map=literal_eval(mapsave.read())
+    mapsave.close()
+else:
+    while True:#设置地图格数
+        blocks=input("地图多少格?要求大于3\n")
+        if blocks.isdigit():
+            blocks=int(blocks)
+            if blocks>3:
+                break
+        else:
+            print("error!")
+            t.sleep(1)
+    map=maps(blocks)
+
+while True:#初始化商店
+    shoplist=input("商店里陈列多少件商品？")
+    if shoplist.isdigit():
+        shoplist=int(shoplist)
+        break
+    else:
+        print("error!")
+        t.sleep(1)
 
 
 
-    
-def dice():#骰子
-    x=ra.randint(1,6)
-    return x
+dicname={}
+dicnumber={}
+for i in df.index:
+    df.at[i,"name"]="p"+str(i+1)
+    dicnumber[df.at[i,"name"]]=i
+    dicname[i]=df.at[i,"name"]
+
+def rename(pid):
+    global dicname
+    rename=input("你的新名字？")
+    dicname[pid]=rename
+    print("你的新名字是:"+rename)
 
 def rate(x):#银行利率
     x=x*1.0001
     return x
 
-def houserule(level):#房产升级规则
-    if level!=None:
-        if level!=6:
-            while True:
-                a=input("按下1升级")
-                if a=="1": 
-                    if df.at[pid,"cash"]>=100*level:
-                        df.at[pid,"cash"]-=100*level
-                        level=level+1
-                        break
-                    else:
-                        print("error!")
-                        t.sleep(1.5)
+def houserule(x,y,pid):#房产升级规则
+    global map
+    if map[y][x][1]!=6:
+        while True:
+            a=input("按下1升级")
+            if a=="1": 
+                if df.at[pid,"cash"]>=100*map[y][x]:
+                    df.at[pid,"cash"]-=100*map[y][x]
+                    map[y][x][1]=map[y][x][1]+1
+                    break
                 else:
-                        a=input("按下1退出")
-                        if a=="1":
-                            break    
-        else:
-            print("已升至最高等级!")
+                    print("error!")
+                    t.sleep(1)
+            else:
+                    a=input("按下1退出")
+                    if a=="1":
+                        break    
     else:
-        return print("error!")
-    return level
+        print("已升至最高等级!")
+
 
 
 
@@ -182,22 +200,23 @@ def pay(pid):#过路费交易
     df.at[map[y][x][0],"bank"]+=roadjudges(pid)
     df.at[pid,"cash"]-=roadjudges(pid)
 
-def price(x):#基础地产价格
+def price():#基础地产价格
     prices=round(ra.uniform(1,3),2)*100
     return prices
 
 def joke():#购买地产规则
     prices=price()
     while True:
+        print("当前价格为",prices)
         luck=ra.randint(1,10)
         while True:
-            a=input("按1以更高的价格直接购买\n按2尝试以较低的价格购买")
+            a=input("按1以1.5倍价格直接购买\n按2尝试以较低的价格购买")
             if a.isdigit():
                 a=int(a)
                 break
             else:
                 print("error!")
-                t.sleep(1.5)
+                t.sleep(1)
         if a==2:
             if luck<=5:
                 prices=prices*1.5
@@ -208,14 +227,15 @@ def joke():#购买地产规则
             break
         else:
             print("error!")
-            t.sleep(1.5)
-        chooce=int(input("按1继续"))
-        if chooce==1:
+            t.sleep(1)
+        chooce=input("按1继续")
+        if chooce=="1":
             continue
         else:
             choices=False
-            return 0,choices
+            return -1,choices
     choices=True
+    print("购买成功！")
     return prices,choices
 
 def walk(pid,dices):#玩家移动规则
@@ -224,16 +244,17 @@ def walk(pid,dices):#玩家移动规则
     x=df.at[pid,"x"]
     y=df.at[pid,"y"]
     while i<dices:
-        if y+1<width:
-            if map[y+1][x]!="*":
-                y=y+1
-        elif x+1<lenth:
-            if map[x+1][y]!="*":
-                x=x+1
         if map[y][x]=="e":
             x=0
             y=0
             df.at[pid,"cash"]+=1000
+            print("你走完了一圈！")
+        elif y+1<width:
+            if map[y+1][x]!="*":
+                y=y+1
+            elif x+1<lenth:
+                if map[y][x+1]!="*":
+                    x=x+1
         i=i+1
     df.at[pid,"x"]=x
     df.at[pid,"y"]=y
@@ -243,19 +264,21 @@ def buy(pid):#金额判定
     global df
     x=df.at[pid,"x"]
     y=df.at[pid,"y"]
-    if map[y][x]==[None,None,None]:
+    if map[y][x]==[-1,-1,-1]:
         decide=joke()
         if decide[1]:
-            map[y][x][1]=pid
+            map[y][x][0]=pid
             if df.at[pid,"cash"]>=decide[0]:
                 df.at[pid,"cash"]-=decide[0]
                 return True
             else:
-                print("error!")
-                t.sleep(1.5)
+                print("金钱不够!")
+                t.sleep(1)
                 return False
         else:
             return False
+    elif map[y][x][0]==pid:
+        houserule(x,y,pid)
 
 def que():#玩家队列
     global number
@@ -270,29 +293,31 @@ def que():#玩家队列
 
 def equity():#股市规则
     global edf
-    for i in range(len(edf)):
+    for i in edf.index:
         luck=ra.random()
         if luck<0.5:
             trend=False
-            if luck<0.25:
+            if luck<0.2:
                 trendency=True
             else:
                 trendency=False
         else:
             trend=True
-            if luck>0.75:
+            if luck>0.7:
                 trendency=True
             else:
                 trendency=False
         if trend:
-            print(edf.at[i,"Brand"],"is upper!")
+            print(i,"涨了!")
             if trendency:
+                print(i,"大涨！涨疯了!")
                 edf.at[i,"per price"]*=2
             else:
                 edf.at[i,"per price"]*=1.3
         else:
-            print(edf.at[i,"Brand"],"is lower!")
+            print(i,"跌了!")
             if trendency:
+                print(i,"大跌！跳楼了！")
                 edf.at[i,"per price"]/=3
             else:
                 edf.at[i,"per price"]/=1.5
@@ -320,12 +345,12 @@ def stock(pid):#股票
     global df
     print("你手中有这些\n",df.at[pid,"stock"])
     while True:
-        choose=input("选择一个并输入:sell?buy?quit?")
+        choose=input("选择一个并输入:出售输入sell，购买输入buy?退出输入quit?")
         if choose=="sell":
             item=input("选择品牌："+str(edf.index))
             if item not in df.at[pid,"stock"]:
                 print("error!")
-                t.sleep(1.5)
+                t.sleep(1)
             else:
                 while True:
                     while True:
@@ -335,10 +360,10 @@ def stock(pid):#股票
                             break
                         else:
                             print("error!")
-                            t.sleep(1.5)
+                            t.sleep(1)
                     if num>df.at[pid,"stock"][item]:
                         print("error!")
-                        t.sleep(1.5)
+                        t.sleep(1)
                     else:
                         df.at[pid,"stock"][item]-=num
                         df.at[pid,"bank"]+=edf[item,"per price"]*num
@@ -347,7 +372,7 @@ def stock(pid):#股票
             item=input("选择品牌："+str(edf.index))
             if item not in edf["Brand"]:
                 print("error!")
-                t.sleep(1.5)
+                t.sleep(1)
             else:
                 while True:
                     num=input("数量?")
@@ -356,12 +381,15 @@ def stock(pid):#股票
                         break
                     else:
                         print("error!")
-                        t.sleep(1.5)
+                        t.sleep(1)
                     if df.at[pid,"bank"]<edf[item,"per price"]*num:
                         print("error!")
-                        t.sleep(1.5)
+                        t.sleep(1)
                     else:
-                        df.at[pid,"stock"][item]+=num
+                        if item in df.at[pid,"stock"]:
+                            df.at[pid,"stock"][item]+=num
+                        else:
+                            df.at[pid,"stock"][item]=num
                         df.at[pid,"bank"]-=edf[item,"per price"]*num
                         break
         if choose=="quit":
@@ -389,13 +417,15 @@ def shop(pid):#超市
 while flag2:#主程序
     day()
     pid=que()
-    person=dicname[pid]
+    equity()
     flag=flag1=True
     while True and df.at[pid,"time"]==0:
-        print("player"+person+"time\n手头现金：",df.at[pid,"cash"],"\n银行存款：",df.at[pid,"bank"])
+        person=dicname[pid]
+        print("player "+person+" time\n手头现金：",df.at[pid,"cash"],"\n银行存款：",df.at[pid,"bank"])
         print("你所处位置：",df.at[pid,'x'],df.at[pid,'y'])
-        dices=dice()
-        t.sleep(1.5)
+        dices=ra.randint(1,6)
+        print("骰子点数为",dices)
+        t.sleep(1)
         for i in map:
             print(i)
         choose=input("选择一件事去做:\ntoy\nwalk\nstock\nbuy\nshop\nrename\n")
@@ -409,10 +439,10 @@ while flag2:#主程序
                     #运行toyrule函数（未编写）
                 else:
                     print("error!")
-                    t.sleep(1.5)
+                    t.sleep(1)
             else:
                 print("error!")
-                t.sleep(1.5)
+                t.sleep(1)
         elif choose=="stock":
             stock(pid)
         elif choose=="walk":
@@ -428,13 +458,16 @@ while flag2:#主程序
             flag1=False
         elif choose=="stop":
             flag2=False
+            df.to_excel("save/"+playersaves+"/playersave.xlsx")
+            mapsave=open("save/"+playersaves+"/mapsave.txt","w")
+            mapsave.write(str(map))
+            mapsave.close()
             break
         elif choose=="rename":
             rename(pid)
         else:
             print("error!")
-            t.sleep(1.5)
-
+            t.sleep(1)
 
 df["total"]=df["cash"]+df["bank"]
 for i in df.index:
