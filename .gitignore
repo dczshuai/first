@@ -1,2 +1,5 @@
 .vscode
 save
+*.swp
+*.un~
+*~
