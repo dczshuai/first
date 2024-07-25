@@ -4,11 +4,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import time as t
 import os
-
+import copy
 
 dics={"Brand":["oil","electric","airspace","house"],"per price":[200,100,150,300]}
-edf=pd.DataFrame(dics,columns=["Brand","per price"],index=["oil","electric","airspace","house"])
-toydic={"toyname":["controldice","blackcard","redcard","updatecard"],"per price":[1000,1000,1000,1000]}
+edf=pd.DataFrame(dics,columns=["Brand","per price"],\
+                 index=["oil","electric","airspace","house"])
+toydic={"toyname":["controldice","blackcard","redcard","updatecard"],\
+        "per price":[1000,1000,1000,1000]}
 toydf=pd.DataFrame(toydic,columns=["toyname","per price"])
 toyindex={}
 for i in toydf.index:
@@ -98,7 +100,8 @@ else:
             print("error!")
             t.sleep(1)
     playersave=player(x)
-    df=pd.DataFrame(playersave,columns=["cash","bank","toy","way","houseplace","time","x","y","stock"])
+    df=pd.DataFrame(playersave,columns=\
+    ["cash","bank","toy","way","houseplace","time","x","y","stock"])
     df.insert(0,"name","")
 if file_exists("save/"+playersaves,"mapsave.txt"):
     mapsave=open("save/"+playersaves+"/mapsave.txt","r")
@@ -134,29 +137,27 @@ for i in df.index:
     dicnumber[df.at[i,"name"]]=i
     dicname[i]=df.at[i,"name"]
 
-import copy
 showmap=copy.deepcopy(map)
 # showmap=[]
 # for maptmp in map:
 #     showmap.append(maptmp)
+
 for line in showmap:
     for line in range(len(showmap)):
         for element in range(len(showmap[line])):
             if map[line][element]!="S"\
             and map[line][element]!="E":
                 if map[line][element][1] in dicname:
-                    showmap[line][element][0]=dicname[map[line][element][1]]\
+                    showmap[line][element][0]=\
+                    dicname[map[line][element][1]]\
                     +str(map[line][element][0])
                 elif showmap[line][element]==[None,None,None]:
                     showmap[line][element]="*"
                 elif showmap[line][element]==[0,-1,-1]:
                     showmap[line][element]="A"
 
-def rename(pid):
-    global dicname
+def refresh():
     global showmap
-    rename=input("你的新名字？")
-    dicname[pid]=rename
     for line in range(len(map)):
         for element in range(len(map[line])):
             if map[line][element]!="S" and map[line][element]!="E":
@@ -164,6 +165,13 @@ def rename(pid):
                     change=dicname[map[line][element][1]]\
                     +str(map[line][element][0])
                     showmap[line][element]=change
+
+def rename(pid):
+    global dicname
+    global showmap
+    rename=input("你的新名字？")
+    dicname[pid]=rename
+    refresh()
     print("你的新名字是:"+rename)
 
 def rate(x):#银行利率
@@ -172,13 +180,14 @@ def rate(x):#银行利率
 
 def houserule(x,y,pid):#房产升级规则
     global map
+    global levelflag
     if map[y][x][1]!=6:
         while True:
             a=input("按下1升级")
             if a=="1": 
-                if df.at[pid,"cash"]>=100*map[y][x]:
-                    df.at[pid,"cash"]-=100*map[y][x]
-                    map[y][x][1]=map[y][x][1]+1
+                if df.at[pid,"cash"]>=100*map[y][x][0]:
+                    df.at[pid,"cash"]-=100*map[y][x][0]
+                    map[y][x][0]=map[y][x][0]+1
                     levelflag=False
                     break
                 else:
@@ -191,13 +200,10 @@ def houserule(x,y,pid):#房产升级规则
     else:
         print("已升至最高等级!")
 
-
-
-
 def fee(pid):#基础过路费
     y=df.at[pid,"y"]
     x=df.at[pid,"x"]
-    level=map[y][x][1]
+    level=map[y][x][0]
     pa_ca=df.at[pid,"cash"]
     if pa_ca>=1000:
         fees=pa_ca*0.02*1.5**level
@@ -208,13 +214,13 @@ def fee(pid):#基础过路费
 def roadjudges(pid):#多个房子过路费
     y=df.at[pid,"y"]
     x=df.at[pid,"x"]
-    owner=map[y][x][0]
+    owner=map[y][x][1]
     price=tmp1=tmp2=num=0
     for i in range(len(map)):
-        if map[y][i][0]==owner:
+        if map[y][i][1]==owner:
             tmp1=tmp1+1
     for i in range(len(map[0])):
-        if map[i][x][0]==owner:
+        if map[i][x][1]==owner:
             tmp2=tmp2+1
     num=max(tmp1,tmp2)
     price=num*fee(pid)
@@ -224,7 +230,7 @@ def pay(pid):#过路费交易
     global df
     x=df.at[pid,"x"]
     y=df.at[pid,"y"]
-    df.at[map[y][x][0],"bank"]+=roadjudges(pid)
+    df.at[map[y][x][1],"bank"]+=roadjudges(pid)
     df.at[pid,"cash"]-=roadjudges(pid)
 
 def price():#基础地产价格
@@ -277,10 +283,10 @@ def walk(pid,dices):#玩家移动规则
             y=0
             df.at[pid,"cash"]+=1000
             print("你走完了一圈！")
-        elif y+1<=width:
+        elif y+1<width:
             if map[y+1][x]!=[None,None,None]:
                 y=y+1
-            elif x+1<=lenth:
+            elif x+1<lenth:
                 if map[y][x+1]!=[None,None,None]:
                     x=x+1
         i=i+1
@@ -293,10 +299,10 @@ def buy(pid):#金额判定
     global levelflag
     x=df.at[pid,"x"]
     y=df.at[pid,"y"]
-    if map[y][x]==[-1,-1,-1]:
+    if map[y][x]==[0,-1,-1]:
         decide=joke()
         if decide[1]:
-            map[y][x][0]=pid
+            map[y][x][1]=pid
             if df.at[pid,"cash"]>=decide[0]:
                 df.at[pid,"cash"]-=decide[0]
                 levelflag=False
@@ -307,8 +313,12 @@ def buy(pid):#金额判定
                 return False
         else:
             return False
-    elif map[y][x][0]==pid:
-        houserule(x,y,pid)
+    elif map[y][x]!="S"\
+    and map[y][x]!="E":
+        if map[y][x][1]==pid:
+            houserule(x,y,pid)
+    else:
+        print("error!")
 
 def que():#玩家队列
     global number
@@ -444,17 +454,20 @@ def shop(pid):#超市
             df.at[pid,"toy"][buy]=1
             item.pop[buy]
 
+print("S为起点，A为可购买地点，E为一圈终点")
+t.sleep(1)
 while flag2:#主程序
     day()
     pid=que()
     equity()
     levelflag=flag=flag1=True
-    print("S为起点，A为可购买地点，E为一圈终点")
-    t.sleep(1)
     while True and df.at[pid,"time"]==0:
         person=dicname[pid]
-        print("player "+person+" time\n手头现金：",df.at[pid,"cash"],"\n银行存款：",df.at[pid,"bank"])
-        print("你所处位置：",df.at[pid,'x'],df.at[pid,'y'])
+        x=df.at[pid,'x']
+        y=df.at[pid,'y']
+        print("player "+person+" time\n手头现金：",\
+              df.at[pid,"cash"],"\n银行存款：",df.at[pid,"bank"])
+        print("你所处位置：","("+str(x)+","+str(y)+")")
         dices=ra.randint(1,6)
         print("骰子点数为",dices)
         t.sleep(1)
@@ -480,9 +493,14 @@ while flag2:#主程序
             stock(pid)
         elif choose=="walk":
             walk(pid,dices)
+            if map[y][x]!="S"\
+            and map[y][x]!="E"\
+            and map[y][x][1]!=-1:
+                pay(pid)
             break
         elif choose=="buy" and levelflag:
             buy(pid)
+            refresh()
         elif choose=="update" and flag:
             houserule(map[df.at[pid,"y"]][df.at[pid,"x"]][1])
             flag=False
