@@ -134,9 +134,9 @@ for i in df.index:
     dicnumber[df.at[i,"name"]]=i
     dicname[i]=df.at[i,"name"]
 
-showmap=[]
-for maptmp in map:
-    showmap.append(maptmp)
+showmap=[[[k for k in j]for j in i]for i in map]
+# for maptmp in map:
+#     showmap.append(maptmp)
 for line in showmap:
     for line in range(len(showmap)):
         for element in range(len(showmap[line])):
