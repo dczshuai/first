@@ -31,26 +31,26 @@ playersaves=input("你的存档名？")
 def maps(blocks):#初始化地图
     global lenth
     global width
-    map=[["*"for i in range(blocks)]for i in range(blocks)]
+    map=[[[None,None,None]for i in range(blocks)]for i in range(blocks)]
     x=0
     y=0
     m=-1
-    map[0][0]="s"
+    map[0][0]="S"
     while True:
         way=ra.randint(0,1)
         if way==0:
             x=x+1
         else:
             y=y+1
-        map[y][x]=[-1,-1,-1]
+        map[y][x]=[0,-1,-1]
         if x+y>=blocks-1:
             break
     while True:#去除多余地图块
-        if map[-1]==["*"for i in range(blocks)]:
+        if map[-1]==[[None,None,None]for i in range(blocks)]:
             map.pop()
         else:
             for j in range(-1,-len(map[-1])-1,-1):
-                if map[-1][j]=="*":
+                if map[-1][j]==[None,None,None]:
                     m=j
                 else:
                     break
@@ -60,7 +60,7 @@ def maps(blocks):#初始化地图
                 map[k].pop()
     lenth=len(map[0])
     width=len(map)
-    map[-1][-1]="e"
+    map[-1][-1]="E"
     return map
 
 def player(x):#初始化金额
@@ -134,10 +134,31 @@ for i in df.index:
     dicnumber[df.at[i,"name"]]=i
     dicname[i]=df.at[i,"name"]
 
+showmap=map
+for line in showmap:
+    for line in range(len(map)):
+        for element in range(len(map[line])):
+            if map[line][element]!="S"\
+            and map[line][element]!="E":
+            #and map[line][element]!="A"
+                if map[line][element][1] in dicname:
+                    showmap[line][element][0]=dicname[map[line][element][1]]+str(map[line][element][0])
+                elif showmap[line][element]==[None,None,None]:
+                    showmap[line][element]="*"
+                elif showmap[line][element]==[0,-1,-1]:
+                    showmap[line][element]="A"
+
 def rename(pid):
     global dicname
+    global showmap
     rename=input("你的新名字？")
     dicname[pid]=rename
+    for line in range(len(map)):
+        for element in range(len(map[line])):
+            if map[line][element]!="S" and map[line][element]!="E":
+                if map[line][element][1] in dicname:
+                    change=dicname[map[line][element][1]]+str(map[line][element][0])
+                    showmap[line][element]=change
     print("你的新名字是:"+rename)
 
 def rate(x):#银行利率
@@ -153,6 +174,7 @@ def houserule(x,y,pid):#房产升级规则
                 if df.at[pid,"cash"]>=100*map[y][x]:
                     df.at[pid,"cash"]-=100*map[y][x]
                     map[y][x][1]=map[y][x][1]+1
+                    levelflag=False
                     break
                 else:
                     print("error!")
@@ -236,6 +258,7 @@ def joke():#购买地产规则
             return -1,choices
     choices=True
     print("购买成功！")
+    t.sleep(1)
     return prices,choices
 
 def walk(pid,dices):#玩家移动规则
@@ -244,16 +267,16 @@ def walk(pid,dices):#玩家移动规则
     x=df.at[pid,"x"]
     y=df.at[pid,"y"]
     while i<dices:
-        if map[y][x]=="e":
+        if map[y][x]=="E":
             x=0
             y=0
             df.at[pid,"cash"]+=1000
             print("你走完了一圈！")
-        elif y+1<width:
-            if map[y+1][x]!="*":
+        elif y+1<=width:
+            if map[y+1][x]!=[None,None,None]:
                 y=y+1
-            elif x+1<lenth:
-                if map[y][x+1]!="*":
+            elif x+1<=lenth:
+                if map[y][x+1]!=[None,None,None]:
                     x=x+1
         i=i+1
     df.at[pid,"x"]=x
@@ -262,6 +285,7 @@ def walk(pid,dices):#玩家移动规则
 def buy(pid):#金额判定
     global map
     global df
+    global levelflag
     x=df.at[pid,"x"]
     y=df.at[pid,"y"]
     if map[y][x]==[-1,-1,-1]:
@@ -270,6 +294,7 @@ def buy(pid):#金额判定
             map[y][x][0]=pid
             if df.at[pid,"cash"]>=decide[0]:
                 df.at[pid,"cash"]-=decide[0]
+                levelflag=False
                 return True
             else:
                 print("金钱不够!")
@@ -418,7 +443,9 @@ while flag2:#主程序
     day()
     pid=que()
     equity()
-    flag=flag1=True
+    levelflag=flag=flag1=True
+    print("S为起点，A为可购买地点，E为一圈终点")
+    t.sleep(1)
     while True and df.at[pid,"time"]==0:
         person=dicname[pid]
         print("player "+person+" time\n手头现金：",df.at[pid,"cash"],"\n银行存款：",df.at[pid,"bank"])
@@ -426,8 +453,9 @@ while flag2:#主程序
         dices=ra.randint(1,6)
         print("骰子点数为",dices)
         t.sleep(1)
-        for i in map:
+        for i in showmap:
             print(i)
+        t.sleep(1)
         choose=input("选择一件事去做:\ntoy\nwalk\nstock\nbuy\nshop\nrename\n")
         if choose=="toy":
             print("您拥有以下道具:")
@@ -448,7 +476,7 @@ while flag2:#主程序
         elif choose=="walk":
             walk(pid,dices)
             break
-        elif choose=="buy":
+        elif choose=="buy" and levelflag:
             buy(pid)
         elif choose=="update" and flag:
             houserule(map[df.at[pid,"y"]][df.at[pid,"x"]][1])
