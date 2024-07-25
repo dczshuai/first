@@ -134,15 +134,17 @@ for i in df.index:
     dicnumber[df.at[i,"name"]]=i
     dicname[i]=df.at[i,"name"]
 
-showmap=map
+showmap=[]
+for maptmp in map:
+    showmap.append(maptmp)
 for line in showmap:
-    for line in range(len(map)):
-        for element in range(len(map[line])):
+    for line in range(len(showmap)):
+        for element in range(len(showmap[line])):
             if map[line][element]!="S"\
             and map[line][element]!="E":
-            #and map[line][element]!="A"
                 if map[line][element][1] in dicname:
-                    showmap[line][element][0]=dicname[map[line][element][1]]+str(map[line][element][0])
+                    showmap[line][element][0]=dicname[map[line][element][1]]\
+                    +str(map[line][element][0])
                 elif showmap[line][element]==[None,None,None]:
                     showmap[line][element]="*"
                 elif showmap[line][element]==[0,-1,-1]:
@@ -157,7 +159,8 @@ def rename(pid):
         for element in range(len(map[line])):
             if map[line][element]!="S" and map[line][element]!="E":
                 if map[line][element][1] in dicname:
-                    change=dicname[map[line][element][1]]+str(map[line][element][0])
+                    change=dicname[map[line][element][1]]\
+                    +str(map[line][element][0])
                     showmap[line][element]=change
     print("你的新名字是:"+rename)
 
