@@ -216,22 +216,33 @@ def roadjudges(pid):#多个房子过路费
     x=df.at[pid,"x"]
     owner=map[y][x][1]
     price=tmp1=tmp2=num=0
-    for i in range(len(map)):
-        if map[y][i][1]==owner:
-            tmp1=tmp1+1
-    for i in range(len(map[0])):
-        if map[i][x][1]==owner:
-            tmp2=tmp2+1
-    num=max(tmp1,tmp2)
-    price=num*fee(pid)
+    if owner==pid:
+        return 0
+    else:
+        for i in range(lenth):
+            if map[y][i]!="S"\
+            and map[y][i]!="E":
+                if map[y][i][1]==owner:
+                    tmp1=tmp1+1
+        for i in range(width):
+            if map[i][x]!="S"\
+            and map[i][x]!="E":
+                if map[i][x][1]==owner:
+                    tmp2=tmp2+1
+        num=max(tmp1,tmp2)
+        price=num*fee(pid)
     return price
 
 def pay(pid):#过路费交易
     global df
     x=df.at[pid,"x"]
     y=df.at[pid,"y"]
-    df.at[map[y][x][1],"bank"]+=roadjudges(pid)
-    df.at[pid,"cash"]-=roadjudges(pid)
+    passfee=roadjudges(pid)
+    owner=map[y][x][1]
+    df.at[pid,"cash"]-=passfee
+    print(dicname[pid],"缴纳现金过路费:",passfee)
+    df.at[map[y][x][1],"bank"]+=passfee
+    print(dicname[owner],"银行到账过路费:",passfee)
 
 def price():#基础地产价格
     prices=round(ra.uniform(1,3),2)*100
@@ -282,17 +293,52 @@ def walk(pid,dices):#玩家移动规则
             x=0
             y=0
             df.at[pid,"cash"]+=1000
+            print("手头现金：",\
+              df.at[pid,"cash"],"\n"\
+                "银行存款：",df.at[pid,"bank"])
             print("你走完了一圈！")
-        elif y+1<width:
-            if map[y+1][x]!=[None,None,None]:
+            bank(pid)
+        else:
+            if y+1==width:
+                x=x+1
+            elif map[y+1][x]!=[None,None,None]:
                 y=y+1
-            elif x+1<lenth:
-                if map[y][x+1]!=[None,None,None]:
-                    x=x+1
+            else:
+                x=x+1
         i=i+1
     df.at[pid,"x"]=x
     df.at[pid,"y"]=y
         
+def bank(pid):
+    global df
+    while True:
+        choose=input("取款输入1，存款输入2")
+        if choose=="1" or choose=="2":
+            choose=int(choose)
+            break
+        else:
+            print("error!")
+            t.sleep(1)
+    while True:
+        withdraw=input("你要取/存多少钱?")
+        if withdraw.isdigit():
+            withdraw=float(withdraw)
+            if df.at[pid,"cash"]>=withdraw and choose==1:
+                df.at[pid,"bank"]-=withdraw
+                df.at[pid,"cash"]+=withdraw
+                break
+            elif df.at[pid,"bank"]>=withdraw and choose==2:
+                df.at[pid,"cash"]-=withdraw
+                df.at[pid,"bank"]+=withdraw
+                break
+            else:
+                print("error!")
+                t.sleep(1)
+        else:
+            print("error!")
+            t.sleep(1)
+
+
 def buy(pid):#金额判定
     global map
     global df
@@ -492,11 +538,11 @@ while flag2:#主程序
         elif choose=="stock":
             stock(pid)
         elif choose=="walk":
-            walk(pid,dices)
             if map[y][x]!="S"\
             and map[y][x]!="E"\
             and map[y][x][1]!=-1:
                 pay(pid)
+            walk(pid,dices)
             break
         elif choose=="buy" and levelflag:
             buy(pid)
