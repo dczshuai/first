@@ -152,7 +152,7 @@ for line in showmap:
                     dicname[map[line][element][1]]\
                     +str(map[line][element][0])
                 elif showmap[line][element]==[None,None,None]:
-                    showmap[line][element]="*"
+                    showmap[line][element]=" "
                 elif showmap[line][element]==[0,-1,-1]:
                     showmap[line][element]="A"
 
@@ -174,9 +174,9 @@ def rename(pid):
     refresh()
     print("你的新名字是:"+rename)
 
-def rate(x):#银行利率
-    x=x*1.0001
-    return x
+def rate(pid):#银行利率
+    global df
+    df.at[pid,"Bank"]*=1.001
 
 def houserule(x,y,pid):#房产升级规则
     global map
@@ -323,11 +323,11 @@ def bank(pid):
         withdraw=input("你要取/存多少钱?")
         if withdraw.isdigit():
             withdraw=float(withdraw)
-            if df.at[pid,"cash"]>=withdraw and choose==1:
+            if df.at[pid,"bank"]>=withdraw and choose==1:
                 df.at[pid,"bank"]-=withdraw
                 df.at[pid,"cash"]+=withdraw
                 break
-            elif df.at[pid,"bank"]>=withdraw and choose==2:
+            elif df.at[pid,"cash"]>=withdraw and choose==2:
                 df.at[pid,"cash"]-=withdraw
                 df.at[pid,"bank"]+=withdraw
                 break
@@ -420,12 +420,7 @@ def day():#时间规则
         time+=1
         print("今天是第",time,"天")
     
-def ecard(cardname):#控制股票卡
-    eq=input("which equity?")
-    edf.at[eq,cardname]=True
-    if edf.at[eq,"blackcard"] and edf.at[eq,"redcard"]:
-        edf.at[eq,"blackcard"]=False
-        edf.at[eq,"redcard"]=False
+
         
 def stock(pid):#股票
     global df
@@ -452,7 +447,7 @@ def stock(pid):#股票
                         t.sleep(1)
                     else:
                         df.at[pid,"stock"][item]-=num
-                        df.at[pid,"bank"]+=edf[item,"per price"]*num
+                        df.at[pid,"bank"]+=edf.at[item,"per price"]*num
                         break
         if choose=="buy":
             item=input("选择品牌："+str(edf.index))
@@ -468,16 +463,16 @@ def stock(pid):#股票
                     else:
                         print("error!")
                         t.sleep(1)
-                    if df.at[pid,"bank"]<edf[item,"per price"]*num:
-                        print("error!")
-                        t.sleep(1)
+                if df.at[pid,"bank"]<edf.at[item,"per price"]*num:
+                    print("error!")
+                    t.sleep(1)
+                else:
+                    if item in df.at[pid,"stock"]:
+                        df.at[pid,"stock"][item]+=num
                     else:
-                        if item in df.at[pid,"stock"]:
-                            df.at[pid,"stock"][item]+=num
-                        else:
-                            df.at[pid,"stock"][item]=num
-                        df.at[pid,"bank"]-=edf[item,"per price"]*num
-                        break
+                        df.at[pid,"stock"][item]=num
+                        df.at[pid,"bank"]-=edf.at[item,"per price"]*num
+                    break
         if choose=="quit":
             break
 
@@ -506,6 +501,7 @@ while flag2:#主程序
     day()
     pid=que()
     equity()
+    rate(pid)
     levelflag=flag=flag1=True
     while True and df.at[pid,"time"]==0:
         person=dicname[pid]
